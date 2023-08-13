@@ -206,6 +206,7 @@ home.packages = with pkgs; [
     nodejs
     neovim-nightly
     zellij
+    lazygit
   ];
 
 }
