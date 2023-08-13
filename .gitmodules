@@ -1,0 +1,6 @@
+[submodule "nvmi"]
+	path = nvmi
+	url = https://github.com/MarWeUMR/nvim
+[submodule "nvim"]
+	path = nvim
+	url = https://github.com/MarWeUMR/nvim
