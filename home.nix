@@ -18,22 +18,22 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   #home.packages = [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
+  # # Adds the 'hello' command to your environment. It prints a friendly
+  # # "Hello, world!" when run.
+  # pkgs.hello
 
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
+  # # It is sometimes useful to fine-tune packages, for example, by applying
+  # # overrides. You can do that directly here, just don't forget the
+  # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
+  # # fonts?
+  # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
+  # # You can also create simple shell scripts directly inside your
+  # # configuration. For example, this adds a command 'my-hello' to your
+  # # environment:
+  # (pkgs.writeShellScriptBin "my-hello" ''
+  #   echo "Hello, ${config.home.username}!"
+  # '')
   #];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -49,14 +49,19 @@
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
-	"./.config/nvim/" = {
-     source = ./nvim;
-     recursive = true;
-   };
+    "./.config/nvim/" = {
+      source = ./nvim;
+      recursive = true;
+    };
+
+    "./.config/erdtree/" = {
+      source = ./erdtree;
+      recursive = true;
+    };
 
   };
 
-nix = {
+  nix = {
     package = pkgs.nixFlakes;
     settings = {
       trusted-substituters = [
@@ -71,60 +76,79 @@ nix = {
     extraOptions = "experimental-features = nix-command flakes";
   };
 
- programs = {
+  programs = {
 
-# neovim = {
-# 	enable = true;
-# };
 
-bash = {
+    bash = {
       enable = true;
       enableCompletion = true;
       historySize = 10000;
       historyFile = "${config.home.homeDirectory}/.bash_history";
-      historyControl = ["ignorespace" "erasedups"];
+      historyControl = [ "ignorespace" "erasedups" ];
     };
 
-fzf = {
-	enable = true;
-	};
+    navi = {
+      # ctrl-G
+      enable = true;
+      enableZshIntegration = true;
+      enableFishIntegration = true;
+    };
 
-starship = {
-    # enable the module
-    enable = true;
-    enableBashIntegration = true;
-    # some other configuration options
-    settings = {
-      add_newline = true;
-      command_timeout = 10000;
+    ripgrep.enable = true;
+    fzf = {
+      enable = true;
+      enableFishIntegration = true;
+      defaultCommand = "fd --type file --color=always";
+      defaultOptions = [
+        "--height 40%"
+        "--border"
+        "--ansi"
+        "--color bg+:#302D41,bg:#1E1E2E,spinner:#F8BD96,hl:#F28FAD"
+        "--color=fg:#D9E0EE,header:#F28FAD,info:#DDB6F2,pointer:#F8BD96"
+        "--color=marker:#F8BD96,fg+:#F2CDCD,prompt:#DDB6F2,hl+:#F28FAD"
+      ];
 
-      cmd_duration = {
-        min_time = 0;
-      };
+      fileWidgetCommand = "fd --type file --color=always";
+      fileWidgetOptions = [ "--min-height 30 --preview-window noborder --preview '(bat --style=numbers,changes --wrap never --color always {} || cat {} || tree -C {}) 2> /dev/null'" ];
+    };
 
-      hostname = {
-        disabled = false;
-        ssh_only = false;
-        format = " at [$hostname](bold red) in ";
-      };
+    starship = {
+      # enable the module
+      enable = true;
+      enableBashIntegration = true;
+      # some other configuration options
+      settings = {
+        add_newline = true;
+        command_timeout = 10000;
 
-      username = {
-        show_always = true;
-        format = "[$user]($style)";
+        cmd_duration = {
+          min_time = 0;
+        };
+
+        hostname = {
+          disabled = false;
+          ssh_only = false;
+          format = " at [$hostname](bold red) in ";
+        };
+
+        username = {
+          show_always = true;
+          format = "[$user]($style)";
+        };
       };
     };
-  };
 
- bat = {
+    bat = {
       enable = true;
       themes = {
         catppuccin-mocha = builtins.readFile (
-          pkgs.fetchFromGitHub {
-            owner = "catppuccin";
-            repo = "bat";
-            rev = "ba4d16880d63e656acced2b7d4e034e4a93f74b1";
-            sha256 = "sha256-6WVKQErGdaqb++oaXnY3i6/GuH2FhTgK0v4TN4Y0Wbw=";
-          }
+          pkgs.fetchFromGitHub
+            {
+              owner = "catppuccin";
+              repo = "bat";
+              rev = "ba4d16880d63e656acced2b7d4e034e4a93f74b1";
+              sha256 = "sha256-6WVKQErGdaqb++oaXnY3i6/GuH2FhTgK0v4TN4Y0Wbw=";
+            }
           + "/Catppuccin-mocha.tmTheme"
         );
       };
@@ -134,52 +158,65 @@ starship = {
       };
     };
 
-atuin = {
-  enable = true;
-  enableFishIntegration = true;
-  enableBashIntegration = true;
-};
+    atuin = {
+      enable = true;
+      enableFishIntegration = true;
+      enableBashIntegration = true;
+    };
 
-fish = {
-  enable = true;
+    zoxide = {
+      enable = true;
+      enableFishIntegration = true;
+      enableBashIntegration = true;
+    };
 
-# plugins = [
-# {
-#         name = "foreign-env";
-#         src = pkgs.fetchFromGitHub {
-#           owner = "oh-my-fish";
-#           repo = "plugin-foreign-env";
-#           rev = "dddd9213272a0ab848d474d0cbde12ad034e65bc";
-#           sha256 = "00xqlyl3lffc5l0viin1nyp819wf81fncqyz87jx8ljjdhilmgbs";
-#         };
-#       }
-# ];
 
-shellInit = ''
+    fish = {
+      enable = true;
+
+
+      shellInit = ''
+
+
       if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
         source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
       end
     '';
-    # interactiveShellInit = ''
-    #   set -U Z_CMD "j"
-    #   set -gx DIRENV_LOG_FORMAT ""
-    # '';
 
 
-  loginShellInit = ''
-      if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
-        source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
-      end
+      interactiveShellInit = ''
 
-      if test -e /nix/var/nix/profiles/default/etc/profile.d/nix.fish
-        source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
-      end
+            # Don't use vi keybindings in unknown terminals,
+            # since weird things can happen.
+            fish_vi_key_bindings
+            bind --mode insert --sets-mode default jk repaint
+
+            alias ls="erd --config ls"
+            alias ll="erd --config ll"
+            fish_add_path ~/.cargo/bin
+
+    '';
+
+
+      loginShellInit = ''
+        if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+          source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+        end
+
+        if test -e /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+          source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+        end
       '';
-};
 
-home-manager = {enable = true;};
+      shellAliases = {
+        v = "vi";
+      };
 
-};
+    };
+
+    home-manager = { enable = true; };
+
+  };
 
   # You can also manage environment variables but you will have to manually
   # source
@@ -195,7 +232,7 @@ home-manager = {enable = true;};
     EDITOR = "nvim";
   };
 
-home.packages = with pkgs; [
+  home.packages = with pkgs; [
     curl
     delta
     fd
@@ -207,6 +244,12 @@ home.packages = with pkgs; [
     neovim-nightly
     zellij
     lazygit
+    lazydocker
+    erdtree
+    cargo
+    gnumake
+    xsel
+    nixpkgs-fmt
   ];
 
 }
