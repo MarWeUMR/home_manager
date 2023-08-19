@@ -78,7 +78,6 @@
 
   programs = {
 
-
     bash = {
       enable = true;
       enableCompletion = true;
@@ -90,7 +89,7 @@
     navi = {
       # ctrl-G
       enable = true;
-      enableZshIntegration = true;
+      enableBashIntegration = true;
       enableFishIntegration = true;
     };
 
@@ -98,6 +97,7 @@
     fzf = {
       enable = true;
       enableFishIntegration = true;
+      enableBashIntegration = true;
       defaultCommand = "fd --type file --color=always";
       defaultOptions = [
         "--height 40%"
@@ -113,10 +113,9 @@
     };
 
     starship = {
-      # enable the module
       enable = true;
       enableBashIntegration = true;
-      # some other configuration options
+
       settings = {
         add_newline = true;
         command_timeout = 10000;
@@ -128,13 +127,53 @@
         hostname = {
           disabled = false;
           ssh_only = false;
-          format = " at [$hostname](bold red) in ";
+          ssh_symbol = "🌎 ";
+          # format = " at [$hostname](bold red) in ";
+          format = " @ [$ssh_symbol$hostname]($style) in ";
+          style = "bold green";
         };
 
         username = {
           show_always = true;
           format = "[$user]($style)";
+          style_user = "bold blue";
         };
+
+        shell = {
+          disabled = true;
+          fish_indicator = "fish";
+          bash_indicator = "bash";
+          zsh_indicator = "zsh";
+          style = "blue bold";
+        };
+
+        character = {
+          # error_symbol = "[λ](bold red)";
+          # success_symbol = "[λ](bold green)";
+          vicmd_symbol = "[ ](bold green)";
+          success_symbol = "[𝈳](purple)";
+          error_symbol = "[𝈳](purple)";
+        };
+
+        directory = {
+          fish_style_pwd_dir_length = 1; # turn on fish directory truncation
+          truncation_length = 3; # number of directories not to truncate
+          read_only = " 🔒";
+        };
+
+        cmd_duration = {
+          show_milliseconds = true;
+          format = "[$duration]($style) ";
+          style = "yellow";
+        };
+
+        time = {
+          style = "green";
+          format = "[$time]($style) ";
+          time_format = "%H:%M";
+          disabled = false;
+        };
+
       };
     };
 
@@ -174,29 +213,19 @@
     fish = {
       enable = true;
 
-
       shellInit = ''
-
-
-      if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
-        source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
-      end
-    '';
-
+        if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+          source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+        end
+      '';
 
       interactiveShellInit = ''
-
-            # Don't use vi keybindings in unknown terminals,
-            # since weird things can happen.
-            fish_vi_key_bindings
-            bind --mode insert --sets-mode default jk repaint
-
-            alias ls="erd --config ls"
-            alias ll="erd --config ll"
-            fish_add_path ~/.cargo/bin
-
-    '';
-
+        # Don't use vi keybindings in unknown terminals,
+        # since weird things can happen.
+        fish_vi_key_bindings
+        bind --mode insert --sets-mode default jk repaint
+        fish_add_path ~/.cargo/bin
+      '';
 
       loginShellInit = ''
         if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
@@ -210,8 +239,11 @@
 
       shellAliases = {
         v = "vi";
+        ls = "erd --config ls";
+        ll = "erd --config ll";
+        "..." = "cd ../..";
+        "...." = "cd ../../..";
       };
-
     };
 
     home-manager = { enable = true; };
