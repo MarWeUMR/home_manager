@@ -1,4 +1,5 @@
 {
+
   description = "Home Manager configuration for WSL";
 
   inputs = {
@@ -8,6 +9,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
@@ -15,8 +22,9 @@
     , nixpkgs
     , home-manager
     , neovim-nightly-overlay
+    , agenix
     , ...
-    }:
+    }@inputs:
     let
       config = {
         allowUnfree = true;
@@ -38,10 +46,18 @@
           # This is required to make sure that the packages are installed in the correct architecture
           system = "x86_64-linux";
           overlays = [ neovimOverlay ];
+
         };
 
+
         # This is the path to our configuration file which we generated earlier
-        modules = [ ./home.nix ];
+        modules = [
+          ./home.nix
+          agenix.homeManagerModules.default
+          {
+            home.packages = [ agenix.packages.x86_64-linux.default ];
+          }
+        ];
       };
     };
 }

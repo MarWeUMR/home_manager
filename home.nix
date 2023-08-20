@@ -1,44 +1,70 @@
 { config, pkgs, ... }:
+let
+  my-kubernetes-helm = with pkgs; wrapHelm kubernetes-helm {
+    plugins = with pkgs.kubernetes-helmPlugins; [
+      helm-diff
+    ];
+  };
+
+  my-helmfile = with pkgs; helmfile-wrapped.override {
+    inherit (my-kubernetes-helm.passthru) pluginsDir;
+  };
+in
 
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "marwe";
   home.homeDirectory = "/home/marwe";
-
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
   home.stateVersion = "23.05"; # Please read the comment before changing.
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
-  #home.packages = [
-  # # Adds the 'hello' command to your environment. It prints a friendly
-  # # "Hello, world!" when run.
-  # pkgs.hello
 
-  # # It is sometimes useful to fine-tune packages, for example, by applying
-  # # overrides. You can do that directly here, just don't forget the
-  # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-  # # fonts?
-  # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
+  xdg = {
+    enable = true;
+  };
 
-  # # You can also create simple shell scripts directly inside your
-  # # configuration. For example, this adds a command 'my-hello' to your
-  # # environment:
-  # (pkgs.writeShellScriptBin "my-hello" ''
-  #   echo "Hello, ${config.home.username}!"
-  # '')
-  #];
+
+  age.identityPaths = [ "/home/marwe/.ssh/id_ed25519" ];
+  age.secrets.ssh_config = {
+    file = ./secrets/ssh_config.age;
+    name = "config";
+    path = "/home/marwe/.ssh/config";
+
+  };
+
+  imports = [
+    ./tmux
+    # ./helm
+    ./k9s
+  ];
+
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
   home.file = {
+    zellij = {
+      target = ".config/zellij/config.kdl";
+      text = ''
+        theme "tokyo-night-dark"
+              themes {
+                  tokyo-night-dark {
+                      fg 169 177 214
+                      bg 26 27 38
+                      black 56 62 90
+                      red 249 51 87
+                      green 158 206 106
+                      yellow 224 175 104
+                      blue 122 162 247
+                      magenta 187 154 247
+                      cyan 42 195 222
+                      white 192 202 245
+                      orange 255 158 100
+                  }
+              }
+      '';
+
+    };
+
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
@@ -59,6 +85,7 @@
       recursive = true;
     };
 
+
   };
 
   nix = {
@@ -77,6 +104,9 @@
   };
 
   programs = {
+    zellij = {
+      enable = true;
+    };
 
     bash = {
       enable = true;
@@ -96,6 +126,7 @@
     ripgrep.enable = true;
     fzf = {
       enable = true;
+      tmux.enableShellIntegration = true;
       enableFishIntegration = true;
       enableBashIntegration = true;
       defaultCommand = "fd --type file --color=always";
@@ -145,6 +176,29 @@
           bash_indicator = "bash";
           zsh_indicator = "zsh";
           style = "blue bold";
+        };
+
+        helm = {
+          format = "[$symbol($version )]($style)";
+          version_format = "v$raw";
+          symbol = "⎈ ";
+          style = "bold white";
+          disabled = false;
+          detect_extensions = [ ];
+          detect_files = [
+            "helmfile.yaml"
+            "Chart.yaml"
+          ];
+          detect_folders = [ ];
+        };
+
+        kubernetes = {
+          disabled = true;
+          symbol = "⎈ ";
+          format = "[$symbol$context( ($namespace))]($style) in ";
+          style = "cyan bold";
+          detect_folders = [ "k8s" ];
+          detect_files = [ "k8s" ];
         };
 
         character = {
@@ -232,7 +286,6 @@
         if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
           source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
         end
-        set -U fish_term24bit 1
       '';
 
       interactiveShellInit = ''
@@ -240,7 +293,15 @@
         # since weird things can happen.
         fish_vi_key_bindings
         bind --mode insert --sets-mode default jk repaint
+
+        start_ssh_agent
+
         fish_add_path ~/.cargo/bin
+
+
+        set -gx PATH $PATH $HOME/.krew/bin
+
+
       '';
 
       loginShellInit = ''
@@ -254,16 +315,80 @@
       '';
 
       shellAliases = {
-        v = "vi";
+        k = "kubectl";
+        kf = "kubectl fuzzy";
+        ld = "lazydocker";
+        lg = "lazygit";
         ls = "erd --config ls";
         ll = "erd --config ll";
         ".." = "cd ..";
         "..." = "cd ../..";
         "...." = "cd ../../..";
+        "1plogin" = "eval $(op signin)";
       };
+
+      plugins = [
+        {
+          name = "autopairs";
+          src = pkgs.fetchFromGitHub {
+            owner = "jorgebucaran";
+            repo = "autopair.fish";
+            rev = "4d1752ff5b39819ab58d7337c69220342e9de0e2";
+            sha256 = "qt3t1iKRRNuiLWiVoiAYOu+9E7jsyECyIqZJ/oRIT1A=";
+          };
+        }
+      ];
+
+      functions = {
+        start_ssh_agent = {
+          body = ''
+            # Check if the SSH_AUTH_SOCK is set and is valid
+              if test -z "$SSH_AUTH_SOCK" -o ! -S "$SSH_AUTH_SOCK"
+                  # Start ssh-agent and capture its output
+                  set agent_info (ssh-agent | string match -r 'SSH_[A-Z_]+=[^;]+')
+                  for info in $agent_info
+                      set key (echo $info | string split '=' | head -1)
+                      set value (echo $info | string split '=' | tail -1)
+                      set -gx $key $value
+                  end
+
+                  # Optional: Add your default key to the agent.
+                  # You'll be prompted for your passphrase if one is set.
+                  ssh-add
+              end
+          '';
+        };
+
+        lab-secret = {
+          body = ''
+            # Retrieve the password
+            set pw (op item get vf6u2brg7yrlrtg2d4zj4dbvoy --format json 2>/dev/null | jq -r '.fields[] | select(.id=="password").value' 2>/dev/null)
+
+            # Check if password was retrieved successfully
+            if test -z "$pw"
+                echo "Failed to retrieve password."
+                return 1
+            end
+
+            # Copy to clipboard using xsel without echoing
+            printf %s "$pw" | xsel --clipboard --input >/dev/null 2>&1
+
+            # Overwrite the variable
+            set pw "overwritten"
+
+            # Clear clipboard after a delay in a detached process
+            command sh -c 'sleep 10; echo "" | xsel --clipboard --input' >/dev/null 2>&1 &          '';
+        };
+      };
+
     };
 
-    home-manager = { enable = true; };
+    git = {
+      enable = true;
+    };
+
+    home-manager.enable = true;
+
 
   };
 
@@ -281,6 +406,7 @@
     EDITOR = "nvim";
   };
 
+
   home.packages = with pkgs; [
     curl
     delta
@@ -291,7 +417,6 @@
     gcc
     nodejs
     neovim-nightly
-    zellij
     lazygit
     lazydocker
     erdtree
@@ -299,6 +424,24 @@
     gnumake
     xsel
     nixpkgs-fmt
+    openssh
+    polkit
+    _1password
+    jq
+    python3
+    age
+    glow
+    kind
+    kubectl
+    helm-dashboard
+    krew
+    my-kubernetes-helm
+    my-helmfile
   ];
+
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (pkgs.lib.getName pkg) [
+      "1password-cli"
+    ];
 
 }
