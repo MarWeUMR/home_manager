@@ -148,9 +148,9 @@
         };
 
         character = {
-          # error_symbol = "[λ](bold red)";
-          # success_symbol = "[λ](bold green)";
+          # λ
           vicmd_symbol = "[ ](bold green)";
+          vimcmd_visual_symbol = "[ ](bold yellow)";
           success_symbol = "[𝈳](purple)";
           error_symbol = "[𝈳](purple)";
         };
@@ -165,6 +165,21 @@
           show_milliseconds = true;
           format = "[$duration]($style) ";
           style = "yellow";
+        };
+
+        git_status = {
+          format = "([「$all_status$ahead_behind」]($style) )";
+          conflicted = "⚠️";
+          ahead = "⟫\${count} ";
+          behind = "⟪\${count} ";
+          diverged = "🔀 ";
+          untracked = "📁 ";
+          stashed = "↪ ";
+          modified = "𝚫 ";
+          staged = "✔ ";
+          renamed = "⇆ ";
+          deleted = "✘ ";
+          style = "bold bright-white";
         };
 
         time = {
@@ -217,6 +232,7 @@
         if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
           source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
         end
+        set -U fish_term24bit 1
       '';
 
       interactiveShellInit = ''
@@ -241,6 +257,7 @@
         v = "vi";
         ls = "erd --config ls";
         ll = "erd --config ll";
+        ".." = "cd ..";
         "..." = "cd ../..";
         "...." = "cd ../../..";
       };
