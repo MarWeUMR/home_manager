@@ -15,6 +15,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    krew2nix = {
+      url = "github:eigengrau/krew2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+
   };
 
   outputs =
@@ -23,6 +29,7 @@
     , home-manager
     , neovim-nightly-overlay
     , agenix
+    , krew2nix
     , ...
     }@inputs:
     let
@@ -35,6 +42,10 @@
         neovim-nightly = neovim-nightly-overlay.packages.${prev.system}.neovim;
       };
 
+      kubectlOverlay = final: prev: {
+        kubectl = krew2nix.packages.${prev.system}.kubectl;
+      };
+
     in
     {
       # The name is `wsl` because I have it changed, it can be anything you want and
@@ -45,7 +56,7 @@
 
           # This is required to make sure that the packages are installed in the correct architecture
           system = "x86_64-linux";
-          overlays = [ neovimOverlay ];
+          overlays = [ neovimOverlay kubectlOverlay ];
 
         };
 

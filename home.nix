@@ -432,7 +432,12 @@ in
     age
     glow
     kind
-    kubectl
+    (pkgs.kubectl.withKrewPlugins (plugins: with plugins; [
+      node-shell
+      pexec
+      stern
+    ]))
+    # kubectl
     helm-dashboard
     krew
     my-kubernetes-helm
