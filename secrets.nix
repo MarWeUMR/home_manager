@@ -7,6 +7,6 @@ let
   # systems = [ system1 system2 ];
 in
 {
-  "ssh_config.age".publicKeys = [ marwe ];
+  "secrets/ssh_config.age".publicKeys = [ marwe ];
   # "secret2.age".publicKeys = users ++ systems;
 }

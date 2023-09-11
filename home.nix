@@ -34,7 +34,6 @@ in
 
   imports = [
     ./tmux
-    # ./helm
     ./k9s
   ];
 
