@@ -138,13 +138,13 @@ plugin:
       - $NAMESPACE
       - --context
       - $CONTEXT
-  debug-copy:
-    shortCut: Shift-G
-    description: Debug copy
-    scopes:
-      - po
-    command: bash
-    background: true
-    args:
-      - -c
-      - "kubectl delete pod -n $NAMESPACE $NAME-debug --grace-period=0; kubectl debug $NAME -ti --attach=false --image=alpine:edge --share-processes --copy-to $NAME-debug -n $NAMESPACE --context $CONTEXT"
+  # debug-copy:
+  #   shortCut: Shift-G
+  #   description: Debug copy
+  #   scopes:
+  #     - po
+  #   command: bash
+  #   background: true
+  #   args:
+  #     - -c
+  #     - "kubectl delete pod -n $NAMESPACE $NAME-debug --grace-period=0; kubectl debug $NAME -ti --attach=false --image=alpine:edge --share-processes --copy-to $NAME-debug -n $NAMESPACE --context $CONTEXT"
