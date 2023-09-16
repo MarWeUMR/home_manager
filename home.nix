@@ -35,34 +35,13 @@ in
   imports = [
     ./tmux
     ./k9s
+    ./zellij
   ];
 
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
   home.file = {
-    zellij = {
-      target = ".config/zellij/config.kdl";
-      text = ''
-        theme "tokyo-night-dark"
-              themes {
-                  tokyo-night-dark {
-                      fg 169 177 214
-                      bg 26 27 38
-                      black 56 62 90
-                      red 249 51 87
-                      green 158 206 106
-                      yellow 224 175 104
-                      blue 122 162 247
-                      magenta 187 154 247
-                      cyan 42 195 222
-                      white 192 202 245
-                      orange 255 158 100
-                  }
-              }
-      '';
-
-    };
 
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
@@ -103,9 +82,6 @@ in
   };
 
   programs = {
-    zellij = {
-      enable = true;
-    };
 
     bash = {
       enable = true;
@@ -441,6 +417,10 @@ in
     krew
     my-kubernetes-helm
     my-helmfile
+    ansible
+    sshpass
+    terraform
+    tree
   ];
 
   nixpkgs.config.allowUnfreePredicate = pkg:
