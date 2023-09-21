@@ -259,6 +259,12 @@ in
 
     };
 
+    direnv = {
+      enable = true;
+      enableBashIntegration = true;
+      nix-direnv.enable = true;
+    };
+
     git = {
       enable = true;
     };
@@ -285,6 +291,7 @@ in
 
   home.packages = with pkgs; [
     curl
+    direnv
     delta
     fd
     ripgrep
@@ -322,6 +329,7 @@ in
     sshpass
     terraform
     tree
+    mongosh
   ];
 
   nixpkgs.config.allowUnfreePredicate = pkg:
