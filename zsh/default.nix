@@ -35,6 +35,7 @@
         "history"
         "directory"
         "utility"
+        "spectrum"
         "completion"
         "syntax-highlighting"
         "history-substring-search"

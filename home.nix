@@ -120,6 +120,12 @@ in
       fileWidgetOptions = [ "--min-height 40 --preview-window noborder --preview '(bat --style=numbers,changes --wrap never --color always {} || cat {} || tree -C {}) 2> /dev/null'" ];
     };
 
+    jujutsu = {
+      enable = true;
+      enableBashIntegration = true;
+      enableZshIntegration = true;
+    };
+
 
     bat = {
       enable = true;
@@ -225,5 +231,6 @@ in
     tree
     mongosh
     nix-zsh-completions
+    terramate
   ];
 }
