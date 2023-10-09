@@ -20,6 +20,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
   };
 
@@ -30,6 +34,7 @@
     , neovim-nightly-overlay
     , agenix
     , krew2nix
+    , fenix
     , ...
     }@inputs:
     let
@@ -46,6 +51,8 @@
         kubectl = krew2nix.packages.${prev.system}.kubectl;
       };
 
+      fenixOverlay = fenix.overlays.default;
+
     in
     {
       # The name is `wsl` because I have it changed, it can be anything you want and
@@ -56,7 +63,7 @@
 
           # This is required to make sure that the packages are installed in the correct architecture
           system = "x86_64-linux";
-          overlays = [ neovimOverlay kubectlOverlay ];
+          overlays = [ neovimOverlay kubectlOverlay fenixOverlay ];
 
         };
 
@@ -66,7 +73,15 @@
           ./home.nix
           agenix.homeManagerModules.default
           {
-            home.packages = [ agenix.packages.x86_64-linux.default ];
+            home.packages = [
+              agenix.packages.x86_64-linux.default
+              (fenix.packages.x86_64-linux.complete.withComponents [
+                "clippy"
+                "rust-src"
+                "rustc"
+                "rustfmt"
+              ])
+            ];
           }
         ];
       };
