@@ -4,6 +4,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "nixpkgs/nixos-23.05";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -30,6 +31,7 @@
   outputs =
     { self
     , nixpkgs
+    , nixpkgs-stable
     , home-manager
     , neovim-nightly-overlay
     , agenix
@@ -42,7 +44,6 @@
         allowUnfree = true;
       };
 
-      # The overlay for Neovim Nightly
       neovimOverlay = final: prev: {
         neovim-nightly = neovim-nightly-overlay.packages.${prev.system}.neovim;
       };
@@ -53,22 +54,22 @@
 
       fenixOverlay = fenix.overlays.default;
 
+      unstablePkgs = import nixpkgs {
+        inherit config;
+        system = "x86_64-linux";
+        overlays = [ neovimOverlay kubectlOverlay fenixOverlay ];
+      };
+
+      stablePkgs = import nixpkgs-stable {
+        inherit config;
+        system = "x86_64-linux";
+      };
+
     in
     {
-      # The name is `wsl` because I have it changed, it can be anything you want and
-      # it will be your `username` by default
       homeConfigurations."marwe" = home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs {
-          inherit config;
+        inherit (unstablePkgs) pkgs;
 
-          # This is required to make sure that the packages are installed in the correct architecture
-          system = "x86_64-linux";
-          overlays = [ neovimOverlay kubectlOverlay fenixOverlay ];
-
-        };
-
-
-        # This is the path to our configuration file which we generated earlier
         modules = [
           ./home.nix
           agenix.homeManagerModules.default
@@ -81,9 +82,12 @@
                 "rustc"
                 "rustfmt"
               ])
+              stablePkgs.terraform # need to keep TF Version < 1.6 because of license
             ];
           }
         ];
+
+
       };
     };
 }

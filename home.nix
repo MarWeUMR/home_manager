@@ -222,7 +222,6 @@ in
     my-helmfile
     ansible
     sshpass
-    terraform
     tree
     mongosh
     nix-zsh-completions
