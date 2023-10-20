@@ -9,8 +9,19 @@ let
   my-helmfile = with pkgs; helmfile-wrapped.override {
     inherit (my-kubernetes-helm.passthru) pluginsDir;
   };
-in
 
+
+  # Git identities
+  work = {
+    name = "Marcus Weber";
+    email = "marcus.weber@sva.de";
+  };
+  personal = {
+    name = "Marcus Weber";
+    email = "marcus.wallau@gmail.com";
+  };
+
+in
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -163,6 +174,18 @@ in
 
     git = {
       enable = true;
+      includes = [
+        {
+          condition = "gitdir:~/work/";
+          contents.user = work;
+        }
+
+        {
+          condition = "gitdir:~/.config/";
+          contents.user = personal;
+        }
+
+      ];
     };
 
     home-manager.enable = true;
