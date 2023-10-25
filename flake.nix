@@ -72,6 +72,12 @@
 
         modules = [
           ./home.nix
+          {
+            # this is used to pull in dependencies automatically by file system structure
+            imports = [
+              ./modules
+            ];
+          }
           agenix.homeManagerModules.default
           {
             home.packages = [

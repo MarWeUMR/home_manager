@@ -43,14 +43,6 @@ in
 
   };
 
-  imports = [
-    ./tmux
-    ./k9s
-    ./zellij
-    ./starship
-    ./zsh
-  ];
-
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
@@ -72,7 +64,7 @@ in
     };
 
     "./.config/erdtree/" = {
-      source = ./erdtree;
+      source = ./modules/erdtree;
       recursive = true;
     };
 
