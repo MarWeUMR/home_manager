@@ -1,4 +1,5 @@
 # This file is used to automatically import any module placed in the 'modules' directory.
+# source: https://github.com/infinisil/system/blob/df9232c4b6cec57874e531c350157c37863b91a0/config/new-modules/default.nix
 
 { lib, ... }:
 
