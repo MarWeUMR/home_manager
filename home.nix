@@ -164,6 +164,18 @@ in
       nix-direnv.enable = true;
     };
 
+    lazygit = {
+      enable = true;
+      settings = {
+        git = {
+          paging = {
+            colorArg = "always";
+            pager = "delta --dark --paging=never";
+          };
+        };
+      };
+    };
+
     git = {
       enable = true;
       includes = [
@@ -212,7 +224,6 @@ in
     gcc
     nodejs
     neovim-nightly
-    lazygit
     lazydocker
     erdtree
     cargo
