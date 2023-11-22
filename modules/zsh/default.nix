@@ -26,7 +26,6 @@
     prezto = {
       enable = true;
       historySubstring.foundColor = "fg=blue";
-      editor.keymap = "vi";
       editor.promptContext = true;
       pmodules = [
         "environment"
@@ -41,6 +40,10 @@
         "history-substring-search"
       ];
     };
+
+    initExtra = ''
+      source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+    '';
 
   };
 }
