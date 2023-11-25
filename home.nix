@@ -71,19 +71,16 @@ in
 
   };
 
+
+
+
   nix = {
     package = pkgs.nixFlakes;
-    settings = {
-      trusted-substituters = [
-        "https://nix-community.cachix.org"
-        "https://cache.nixos.org"
-      ];
-      trusted-public-keys = [
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      ];
-    };
-    extraOptions = "experimental-features = nix-command flakes";
+    extraOptions = ''
+      experimental-features = nix-command flakes
+      substituters = https://cache.nixos.org https://nix-community.cachix.org
+      trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+    '';
   };
 
   programs = {
@@ -100,7 +97,6 @@ in
       # ctrl-G
       enable = true;
       enableBashIntegration = true;
-      enableZshIntegration = true;
     };
 
     ripgrep.enable = true;
@@ -108,7 +104,6 @@ in
       enable = true;
       tmux.enableShellIntegration = true;
       enableBashIntegration = true;
-      enableZshIntegration = true;
       defaultCommand = "fd --type file --color=always";
       defaultOptions = [
         "--height 80%"
@@ -147,20 +142,17 @@ in
     atuin = {
       enable = true;
       enableBashIntegration = true;
-      enableZshIntegration = true;
     };
 
     zoxide = {
       enable = true;
       enableBashIntegration = true;
-      enableZshIntegration = true;
     };
 
 
     direnv = {
       enable = true;
       enableBashIntegration = true;
-      enableZshIntegration = true;
       nix-direnv.enable = true;
     };
 
@@ -192,6 +184,22 @@ in
       ];
     };
 
+    helix = {
+      enable = true;
+      settings = {
+        editor = {
+          color-modes = true;
+          line-number = "relative";
+          indent-guides.render = true;
+          cursor-shape = {
+            normal = "block";
+            insert = "bar";
+            select = "underline";
+          };
+        };
+      };
+    };
+
     home-manager.enable = true;
 
 
@@ -210,6 +218,7 @@ in
   home.sessionVariables = {
     EDITOR = "nvim";
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+    COLORTERM = "truecolor";
   };
 
 
@@ -223,7 +232,7 @@ in
     zip
     gcc
     nodejs
-    neovim-nightly
+    neovim # stable or nightly depending on the overlay in flake.nix
     lazydocker
     erdtree
     cargo
@@ -233,10 +242,13 @@ in
     openssh
     polkit
     jq
-    python3
     age
     glow
     kind
+    (pkgs.python311.withPackages (packages: with packages; [
+      pip
+      pynvim
+    ]))
     (pkgs.kubectl.withKrewPlugins (plugins: with plugins; [
       node-shell
       pexec
@@ -250,7 +262,7 @@ in
     sshpass
     tree
     mongosh
-    nix-zsh-completions
     terramate
+    docker
   ];
 }

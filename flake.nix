@@ -44,10 +44,6 @@
         allowUnfree = true;
       };
 
-      neovimOverlay = final: prev: {
-        neovim-nightly = neovim-nightly-overlay.packages.${prev.system}.neovim;
-      };
-
       kubectlOverlay = final: prev: {
         kubectl = krew2nix.packages.${prev.system}.kubectl;
       };
@@ -57,7 +53,12 @@
       unstablePkgs = import nixpkgs {
         inherit config;
         system = "x86_64-linux";
-        overlays = [ neovimOverlay kubectlOverlay fenixOverlay ];
+        overlays = [
+          # uncomment will result in `neovim` being nightly version in home.pkgs
+          # inputs.neovim-nightly-overlay.overlay
+          kubectlOverlay
+          fenixOverlay
+        ];
       };
 
       stablePkgs = import nixpkgs-stable {
@@ -69,6 +70,7 @@
     {
       homeConfigurations."marwe" = home-manager.lib.homeManagerConfiguration {
         inherit (unstablePkgs) pkgs;
+
 
         modules = [
           ./home.nix
