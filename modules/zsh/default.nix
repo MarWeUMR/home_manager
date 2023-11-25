@@ -1,13 +1,44 @@
 { pkgs, ... }:
 {
+
+  home.packages = with pkgs; [
+    zsh-fzf-tab
+    nix-zsh-completions
+  ];
+
+  programs.direnv = {
+    enableZshIntegration = true;
+  };
+
+  programs.zoxide = {
+    enableZshIntegration = true;
+  };
+
+  programs.navi = {
+    # ctrl-G
+    enableZshIntegration = true;
+  };
+
+  programs.fzf = {
+    enableZshIntegration = true;
+  };
+
+  programs.atuin = {
+    enableZshIntegration = true;
+  };
+
+  programs.starship = {
+    enableZshIntegration = true;
+  };
+
   programs.zsh = {
-    enable = true;
-    enableAutosuggestions = true;
-    enableCompletion = true;
-    history.expireDuplicatesFirst = true;
-    history.extended = true;
-    history.ignoreAllDups = true;
-    syntaxHighlighting.enable = true;
+    enable = false;
+    enableAutosuggestions = false;
+    enableCompletion = false;
+    history.expireDuplicatesFirst = false;
+    history.extended = false;
+    history.ignoreAllDups = false;
+    syntaxHighlighting.enable = false;
 
     shellAliases = {
       k = "kubectl";
@@ -23,28 +54,29 @@
       fkill = "kill -9 $(ps aux | fzf | awk '{print $2}')";
     };
 
-    prezto = {
+    antidote = {
       enable = true;
-      historySubstring.foundColor = "fg=blue";
-      editor.promptContext = true;
-      pmodules = [
-        "environment"
-        "terminal"
-        "editor"
-        "history"
-        "directory"
-        "utility"
-        "spectrum"
-        "completion"
-        "syntax-highlighting"
-        "history-substring-search"
+      plugins = [
+        # add fish-like features
+        "zsh-users/zsh-syntax-highlighting"
+        "zsh-users/zsh-autosuggestions"
+        "zsh-users/zsh-history-substring-search"
+
       ];
     };
 
     initExtra = ''
+      
+      source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
       source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
     '';
 
   };
 }
+
+
+
+
+
+
 
