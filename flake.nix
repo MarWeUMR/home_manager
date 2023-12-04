@@ -55,7 +55,7 @@
         system = "x86_64-linux";
         overlays = [
           # uncomment will result in `neovim` being nightly version in home.pkgs
-          # inputs.neovim-nightly-overlay.overlay
+          inputs.neovim-nightly-overlay.overlay
           kubectlOverlay
           fenixOverlay
         ];
