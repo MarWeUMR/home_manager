@@ -3,7 +3,7 @@
 
   home.file = {
    "./.config/tmux/" = {
-       source = ./modules/tmux;
+       source = ./.;
        recursive = true;
      };
 
